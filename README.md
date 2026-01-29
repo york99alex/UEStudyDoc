@@ -4,6 +4,9 @@
 
 快捷菜单栏：选择、快速添加、蓝图、镜头、运行（Esc键退出运行）
 
+总是推荐使用纯英文的编辑器
+Edit编辑-Preferences编辑器偏好-搜索Language-Editor Language选择English
+
 **世界场景设置**（World Settings）：
 
 顶部菜单选择 窗口-世界场景设置，每个关卡都有独立的世界场景设置，将该面板添加到右侧可以进行关卡的各种设置，包括 游戏模式、调整关卡全局光照效果。
@@ -45,6 +48,8 @@
 **变化**快捷键：
 
 选中物体后，w开启移动，e开启旋转，r开启缩放，按空格循环切换。end键会让物体落到平面上
+在==移动时按住shift==，可以保持物体在水平/垂直方向移动，并且保持视角跟随于物体，可以更高效的进行移动拖拉
+
 F键，focus，聚焦到Actor
 复制：alt+移动拖拉，或者ctrl+d
 多选：ctrl加选中，可加可减
@@ -110,13 +115,22 @@ Quixel Bridge，快速添加到项目。是虚幻官方的提供高质量的3D�
 - 金属感：
 - 粗糙度：粗糙度为0是光滑的镜面反射，为1则是完全粗糙的漫反射。
 
-#### 操作
+#### 节点操作
 
 - 创建常量 Constant：
   - 按住1鼠标左键，1维常量
   - 按住2鼠标左键，2维向量
   - 按住3鼠标左键，3维向量，可连接到基础颜色，调节颜色。
 - 常量转为参数，对外部暴露：右键常量节点，转换为参数，命名
+- ==UV节点==：UV 是一套将 2D 坐标映射到 3D 表面上的“地址索引系统”，在引擎底层，UV 实际上是存储在 **顶点（Vertex）** 上的属性数据。而UV 空间就是一个标准的二维笛卡尔坐标系，具有重复、截断、镜像的特点。
+  1. Tiling (平铺/缩放)数学操作： UV * 2
+     结果： 贴图在模型上变小了，重复了 2 次。因为原本 [0, 1] 的范围现在变成了 [0, 2]。
+  2. Offset (偏移/位移)数学操作： UV + 0.5
+     结果： 贴图位置发生了移动。
+  3. Panner (平移旋转)数学操作： UV + (Time * Speed)
+     结果： 贴图在表面滚动起来了，比如动态水体或传送带的核心逻辑。
+
+- [**黄金树效果实战**](https://www.bilibili.com/video/BV1nA4y1f7eh?t=586.5)，包括自发光材质、菲涅耳表达式、遮罩、蒙版、树叶抖动。
 
 ### 纹理/贴图 Texture
 
@@ -174,7 +188,7 @@ Quixel Bridge，快速添加到项目。是虚幻官方的提供高质量的3D�
 
 注：所有环境光照的操作都会实时地影响整个关卡的效果，也即动态实时的天气系统
 
-- 定向光源：又名大气光源、太阳光、平行光
+- 定向光源：又名大气光源、太阳光、平行光。（空场景确保==优先创建此项==）
   - 参数-源角度：控制太阳的大小，影响影子模糊。
   - 操作-调整太阳光角度：两种
     - 第一种：选中 DirectionalLight，按e键进行旋转操作，三个周都可以
@@ -208,6 +222,41 @@ Quixel Bridge，快速添加到项目。是虚幻官方的提供高质量的3D�
 - **眼部自适应**：人眼在亮暗差异较大的情况下过度时，会自动调整眼球细胞对光线的敏感度，从而更好的观察和适应环境，在虚幻引擎中，为了实现这一效果，设计出了**自动曝光**这一功能，但对于一些本身明暗变化较小的单一环境，可能会引起对于场景中光照强度的误判，可能需要调整或关闭这一功能
   - 通过后期盒，Exposure - Max/Min EV100，都设置为0则关闭自动曝光
 - 后期处理材质：设置与后期处理一起使用的材质，以创建破坏的视觉屏幕效果、区域类型效果，也可以实现游戏的整体外观风格（比如：无主之地的美漫风）
+- 色差强度 Chromatic Aberration：模拟镜头、色散的效果
+- Image Effects：类似于暗角
+- 色温 Temperature：冷暖色调
+
+#### 后期调节
+
+颜色基础认知：
+
+- 色彩心理
+- 冷暖变化
+- 色彩属性
+
+色彩工具网站：http://bj.91join.com/color.html
+
+颜色调节思路：
+
+- 统一整体颜色表现，把控画面情绪氛围
+- 协调冷暖对比，适当增强明暗关系中的冷暖关系
+
+调节流程及常用参数
+
+- 颜色分级表现
+  - 色温/白平衡
+  - 全局Global，中间调，阴影，高光
+- 镜头辅助效果
+  - 辉光/光溢出
+  - 曝光
+  - 光斑
+  - 暗角
+  - 镜头脏迹
+  - 色调分离
+  - 镜头景深
+    - 光圈
+    - 焦距
+- 一键调节，可理解为滤镜，Misc - 颜色分级LUT，需要导入LUT资产
 
 
 
@@ -222,6 +271,41 @@ UE4效果：只有直接光照（UE4可以通过静态烘焙达到类似UE5的�
 
 UE5效果：
 <img src="https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/12/441af2820131659af07760a032e9b116-image-20260112121706542-9b45b3.png" alt="image-20260112121706542" style="zoom: 50%;" />
+
+
+
+### 体积光
+
+如何要应用射灯、光照等的**体积散射强度**，达到雾气散射的效果（丁达尔效应）
+
+- 后期盒中勾选启用**体积雾**
+- 射灯里勾选启用**投射体积阴影**，可以将照射的光照受到物体遮挡的影响
+
+**技巧**：
+
+如何让一个光源打出多个光束，在光源前放置一个立方体，完全遮挡住以后，把某个树叶材质应用到立方体上，立方体就会变成很多树叶，从而透出多个自然的光
+
+
+
+### 光照通道
+
+Lighting Channel，每个光源和每个网格体都有三个通道开关0、1、2，默认都处在通道0。
+**规则**：只有当光源和物体的通道“对上”时，该光源才会对该物体产生影响。
+
+应用场景：一些不太符合物理规律但是又能有更好更适合的美术表现，让光源只对特定物体生效，比如提亮主角、眼睛、主要物品等。
+
+需要注意，通道是否匹配并不影响阴影投射，如果你关闭了一个物体对某个光源的通道，该物体确实不会被照亮，但它**依然可能投射阴影**（如果光源开启了阴影投射，也可以手动关闭）
+
+
+
+### 视图-光照
+
+在视图右侧的光照选项中，可以切换当前视图的光照模式：![image-20260127142119344](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/27/03b8ed016862d08295d609b62e17c119-image-20260127142119344-200de0.png)
+
+- 光照：正常的环境效果
+- 无光照：剔除掉所有光照，仅保留材质本身的底色影响
+- 仅光照：只有灯光光照的表现，不会包含模型自身的纹理信息所影响的环境效果
+- 细节光照：区别于全光照，细节光照下所有的模型都是白模，剔除模型的底色，可以看到模型的粗糙、金属、反射等
 
 
 
@@ -305,6 +389,258 @@ VSM，可以提供稳定的高分辨率阴影，通常与Nanite、Lumen以及世
 
 
 
+# 地编教程
+
+
+
+## 参考图与资源
+
+有目标有需求才有具体的地编落地实现，美术、CG网站，见[参考链接](#链接)
+
+
+
+## 天空大气
+
+可以通过手动创建天空球使用对应材质（调整氛围颜色）、编辑[环境光照](#环境光照)、使用[后期盒](#后期盒)处理等来综合调整。
+
+天空球的制作：https://www.bilibili.com/video/BV1wU4y1U7Sc?t=457.4 （法线向内的球体）
+
+
+
+## 开放世界地形
+
+
+
+### 高度图
+
+可通过 WorldCreator、WorldMachine、Gaea、Houdini 制作（上手难度递增）
+
+在地形模式，左侧 从文件导入
+高度图是灰度贴图，仅有黑白色调，颜色越白表示高度越高，越黑则表示越低。
+
+
+
+## 雾效
+
+大气雾是整个环境的雾气底色，而==片雾==则是有点睛去表达体积感和景深的作用。
+
+片雾：本质上是一个带有透明材质的平面（Static Mesh Plane）或粒子（Particle），通过一张带有噪声（Noise）的贴图和透明度算法来“伪装”成雾气。
+
+
+
+# 摄像机
+
+通过快速创建-过场动画-电影摄像机Actor，来创建摄像机。
+
+对于16：9的画面，适应人眼的焦距是在12~15左右
+
+操作: 选中摄像机，右键 控制Camera，可以固定以摄像机视角的窗口，配合多窗口视图（主菜单栏-窗口-视图）有助于摆放等地编工作
+
+
+
+# 镜头
+
+镜头其实也是一种表达方式，一种叙述语言，与电影中的镜头同理
+
+- 取景：远景、全景、中景、近景、特写
+- 镜头运动方式：固定镜头和运动镜头（推、拉、摇、移、跟、升、降等，以及变焦聚镜头（希区柯克式变焦）等）
+- 镜头时长：短镜头、长镜头
+
+## Sequence定序器
+
+关卡菜单栏中 - 添加关卡序列
+![image-20260127160247174](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/27/5728e9671d126e0919d2b6df1b823e29-image-20260127160247174-de95f2.png)
+
+添加关卡序列以后会自动打开Sequence视图，新建摄像机，根据当前画幅调整焦距，16：9的画面适合12~15的焦距
+
+![image-20260127160503571](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/27/0ed2f553ee3c5c4900e05d6f11d26bb6-image-20260127160503571-e0fa67.png)
+
+尝试做一个节奏偏缓的10秒的推的、长镜头
+
+1. 选择变换Transform，在当前帧/初始帧创建关键帧（俗称K一帧）
+   ![image-20260127160949668](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/27/cb3212d3df64e82f8226b4412422a2f8-image-20260127160949668-f08282.png)
+2. 时间轴的单位为帧，一秒30帧，默认150帧，调整总时长。
+   点击CineCameraActor右侧的镜头按钮，切换到该镜头控制视图
+   <img src="https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/27/5447796baa48ec3ea95a547010cb16c2-image-20260127162346307-41e1d5.png" alt="image-20260127162346307" style="zoom:67%;" />
+3. 上方视图为摄像头控制视图时，我们在变换轨道上的第0帧k一帧，然后移动当前时间轴至最后，在上方控制视图中移动镜头位置至目标点（比如向前移动），然后在最后一帧k一帧，此时两个关键帧相连，点击上方摄像头镜头视图中的播放按钮，画面就开始移动了。
+4. 可选：影片场景捕获，将所得到的镜头画面导出为视频
+   ![image-20260127162736478](C:\Users\admin\AppData\Roaming\Typora\typora-user-images\image-20260127162736478.png)
+   添加Movie Render Queue插件可以将影片打板为图片序列，并且在输出时提供更多选项达到高精度等效果
+
+
+
+# 蓝图BluePrint
+
+## 蓝图类BluePrint Class
+
+- **Actor**：一个可被放置和生成在场景中的物体，包括但不限于箱子、房屋、载具、摆件等。
+- **Pawn**：继承自Actor，可被玩家或AI附身/控制（Possess），并不一定是生物，比如载具或AI单位等
+- **Character**：继承自Pawn，转为双足人形生物设计的，自带以下三个核心组件：
+  - CharacterMovementComponent (移动组件)：内置了极其复杂的行走、跳跃、下落、游泳和飞行逻辑，且支持完美的网络预测同步
+  - Capsule Component (胶囊体)： 预设好的物理碰撞形状
+  - Skeletal Mesh (骨骼网格体)： 预设好的渲染层级
+- **Player Controller**：控制器，通常为玩家或者AI，Controller是灵魂，Character是肉体，通过附身Possess进行连接。
+
+
+
+## 蓝图概念
+
+- **Variables变量**，注意新建变量以后需要编译才可以进行进一步设置
+  - 变量类型
+    - 基础逻辑与数值：
+      - Boolean布尔
+      - Integer整数
+      - Float浮点数
+    - 字符文本：
+      - Name名称：被内部索引化的字符，比较Name远快于比较String
+      - String字符串：调试文本或拼接、替换、切割，灵活但开销大
+      - Text文本：UI专用，==唯一支持多语言本地化==
+    - 空间变化
+      - Vector向量：x, y, z
+      - Rotator旋转量：Roll翻滚角, Pitch俯仰角, Yaw偏航角
+        <img src="https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/29/ed62567826f956c471912353853be451-9080a58875e091bda30c3fdac4ec66d7-356ab5.png" alt="img" style="zoom: 80%;" />
+      - Transform变换：用于Spawn Actor，包含完整的位置Location、旋转Rotation、缩放Scale
+  - 对象类型 Object Types，其引用类型
+    - Object Reference 对象引用，实例指针，比如存储玩家或场景中具体存在的实例
+    - Class Reference 类引用，蓝图、C++类的指针，比如告诉引擎我需要生成哪种物体
+    - Soft Object Reference、Soft Class Reference：软引用，区别于上面两个强绑定，比如A蓝图引用了B资产，那么只要A载入内存，B也要跟着载入；而软引用，则是存储资产的路径，不会自动加载，需要手动调用 Async Load Asset（异步加载），等加载完毕以后才能转为直接引用/硬引用来使用。
+      - 如果你确定这个东西“必须一直存在且响应极快”，用 **Hard**。
+        如果你不确定这个东西什么时候会出现，或者它很大，用 **Soft**。
+  - 变量的容器类型 Container
+    ![image-20260129115001539](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/29/83c30c700d09ec5bb36f3bfc4661d4b2-image-20260129115001539-fcce3e.png)
+- **Function函数**，可选的输入或输出，封装一系列的操作与命令
+
+### 事件图EventGraph
+
+默认的几个事件：
+
+- Event BeginPlay 当蓝图创建时的事件
+- Event Tick 每一帧都会调用的事件
+
+### 节点
+
+常用节点，通过引脚和入角拉线
+
+- Sequence 通过添加pin脚，按顺序执行一系列的操作
+- 循环
+  - For Each Loop 
+  - For Loop
+  - While Loop
+- Branch 条件语句，相当于If
+- IsValid 合法值判断
+
+习惯为蓝图进行区域整理与注释，框选后快捷键C
+
+### 自定义事件
+
+Add Custom Event，命名后可跨蓝图在另一个事件图中搜索事件名进行订阅
+
+
+
+### 蓝图调试
+
+1. Print 打印
+2. BreakPoint 断点调试，右键需要断点的节点，Add BreakPoint，蓝图运行时如果达到该断点则会停住，快捷键F9
+3. Watch Values，在蓝图节点间或变量引脚右键，选择Watch this value监视此致，静态观察，不需要中断游戏
+
+
+
+## 增强输入
+
+[虚幻引擎中的增强输入 | 虚幻引擎 5.7 文档 | Epic Developer Community](https://dev.epicgames.com/documentation/zh-cn/unreal-engine/enhanced-input-in-unreal-engine)
+
+增强输入系统主要有四个概念：
+
+-  **输入动作（Input Actions）** 表示可以执行的某个操作的意图，通过定义不同类型来确定行为，
+  - ValueType：比如移动是2维Axis2D，跳跃是布尔动作Digital(bool)
+-  **输入映射上下文（Input Mapping Contexts）** 输入动作的集合，将动作意图与按键关联起来，描述了给定输入动作的触发规则。映射上下文可以动态地为每个用户添加、移除或安排优先次序。
+  - 层级结构，上层为输入动作，动作层下面是用户的输入，比如按键、按钮等
+-  **输入修饰器（Input Modifiers）** 
+-  **输入触发器（Input Triggers）** 
+
+### 第三人称移动实战
+
+参考视频：[添加与配置增强输入系统](https://www.bilibili.com/video/BV1Fy411v7gm?p=3)
+
+1. 定义意图，创建 Input Action 资产
+
+   - `IA_Move` 移动，将 Value Type 设置为 Axis2D
+   - `IA_Look` 转动视角。Value Type 同样为 Axis2D
+   - `IA_Jump` 跳跃。保持默认的 Digital (Bool) 即可
+
+2. 绑定按键，连接意图与键盘输入，创建 Input Mapping Context 资产 IMC
+
+   - 默认Default Key Mappings 中添加映射：
+     - 选择 `IA_Move`：绑定 **W** ，Modifiers添加元素，即对输入的修改，默认X轴正，所以 w 无需操作， **S** (Negate负值), **A** (Negate + Swizzle Input Axis Values 交换xy轴输入，选择YXZ，将x轴的输入修改为-y轴), **D** (Swizzle Input Axis Values默认YXZ)。
+     - 选择 `IA_Look`：绑定 **Mouse XY 2D-Axis**。
+     - 选择 `IA_Jump`：绑定 **Space Bar**。
+
+3. 添加眼睛，第三人称视角镜头
+
+   1. 添加组件： 点击左上角 +Add，搜索并添加 Spring Arm (弹簧臂)。
+
+   2. 添加相机： 选中 Spring Arm，再点击 +Add 添加 Camera。这样相机就会乖乖跟着弹簧臂走，不会穿模。
+
+   3. 配置旋转：
+
+      - 选中 BP_MyCharacter (Self)，在细节面板取消勾选 Use Controller Rotation Yaw（否则转视角时角色也跟着转）
+      - 选中 Character Movement 组件，勾选 Orient Rotation to Movement（这样角色转身时，身体会朝向移动方向）
+      - 选中 Spring Arm，勾选 Use Pawn Control Rotation（这样鼠标动，相机才动）
+
+      *结构*：![image-20260129173309961](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/29/05bf05f949a362f2a77486778ee18cca-image-20260129173309961-0fadc7.png)
+
+      
+
+   4. 编写神经，让动作输入事件产生实际的效果
+
+      1. 在World Settings中，将GameMode Override更改为自己创建的蓝图游戏模式GameMode类，将默认控制者Defauilt Pawn Class选择为之前创建的蓝图Character类（与在蓝图GameMode类中修改一样）
+      2. 在BP_MyCharacter事件图中，为玩家控制器注册IMC上下文
+         ![image-20260129173727119](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/29/5acb7e46f4f14b619060ab5cee590f6b-image-20260129173727119-a4ce5d.png)
+      3. 处理移动，在BP_MyCharacter事件图中，右键搜索节点 IA_Move ，选择 Input - Enhanced Action Event 下的 IA_Move，下图中 Action Event的出脚Action Value右键 Split Struct pin直接转为了x、y参数，x轴前后的移动，y轴对应左右，右手方向为y轴正轴
+         ![image-20260129174541069](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/29/172697e06a2f09d126db07072e0056c8-image-20260129174541069-01bc72.png)
+      4. 这一步点击保存与编译再Play就可以实现wasd的运动了
+      5. 右键搜索 IA_Look 事件
+         直接连接到 Add Controller Yaw Input (对应 Action Value X) 和 Add Controller Pitch Input (对应 Action Value Y)
+      6. 补充：如果添加俯视等仰角变化时，以俯视注视角色同时移动时发现角色移动不懂，是因为 Add Movement Input 的 World Direction获取时传入了额外维度的数据，其实只需要z轴，拆分一下引脚输出和输入即可修复。
+
+
+
+
+
+# ==命名规范==
+
+对于命名中的名称的命名主要采用帕斯卡命名
+
+## 资产
+
+- **几何体**
+  - **静态网格体 Static Mesh**：SM_帕斯卡[\_Size]，比如：SM_Rock_Big
+  - **骨骼网格体 Skeletal Mesh**：SK_，比如 SK_Hero_Knight
+  - **几何体笔刷 Geometry Cache**：GC_，比如 GC_ClothSim
+- **材质**
+  - **主材质 Material**：M\_, M_Metal_Rust
+  - **材质实例 Material Instance**：MI\_，MI_Metal_Gold
+  - **材质函数 Material Function**：MF\_，MF_WaveDistortion
+  - **材质参数集 Parameter Collection**：MPC_，MPC_GlobalWeather
+  - 同一个物体名称有多个材质，可在最后加补全的两位数字（01而不是1）M_MetalBone_01
+- **蓝图**
+  - **蓝图类 Blueprint Class**，BP\_，BP_Door_Interactive
+  - **蓝图接口 Blueprint Interface**：BPI\_，BPI_Damageable
+  - **蓝图组件 Actor Component**：BPC\_，BPC_HealthSystem
+  - **蓝图函数库 Function Library**：BPL\_，BPL_MathUtils
+  - **结构体 Structure**：S\_，S_ItemData
+  - **枚举 Enumeration**：E_，E_GameState
+  - **输入控制 Input Action**：IA_，IA_Move
+
+
+
+## 蓝图
+
+采用帕斯卡命名，将每个单词的首字母大写，不需要连接任何符号或空格
+
+对于**Bool变量**，在首字母前加上小写的b，比如bIsDead，拖动到图里会自动识别为Bool变量
+![image-20260129121904357](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/29/74ea41e6f514e343e255bfd9a6524f34-image-20260129121904357-5c59b8.png)
+
 
 
 
@@ -316,7 +652,11 @@ VSM，可以提供稳定的高分辨率阴影，通常与Nanite、Lumen以及世
 ## 资源
 
 - [贴图 • Poly Haven](https://polyhaven.com/zh/textures)
-- 
+- **美术参考图**
+  - [ArtStation](https://www.artstation.com/)
+  - [Pinterest](https://www.pinterest.com/)
+  - [GGAC](https://m.ggac.com/) 国内
+- [PBRMAX](https://pbrmax.cn/discover?lan=zh-CN&f=) 国风扫描资产
 
 
 
@@ -332,4 +672,11 @@ VSM，可以提供稳定的高分辨率阴影，通常与Nanite、Lumen以及世
 
 - [【虚幻引擎】爆肝两个月！拜托三连了！这绝对是全B站最用心的UE5.1全中文新手入门公开教程，耗时千余小时开发！_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Cd4y1V7G5/)
   入门4小时+实战4小时
+- [MotionDesign 植物生长动画](https://www.bilibili.com/video/BV1Rm42137WL/) Effector使用
 - 
+
+
+
+# Demo
+
+目标：多样运动能力，控制物体交互，漂浮固定物体
