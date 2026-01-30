@@ -509,6 +509,7 @@ VSM，可以提供稳定的高分辨率阴影，通常与Nanite、Lumen以及世
   - 变量的容器类型 Container
     ![image-20260129115001539](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/01/29/83c30c700d09ec5bb36f3bfc4661d4b2-image-20260129115001539-fcce3e.png)
 - **Function函数**，可选的输入或输出，封装一系列的操作与命令
+- 父类子类，继承与重写，私有公有访问域等略
 
 ### 事件图EventGraph
 
@@ -558,7 +559,7 @@ Add Custom Event，命名后可跨蓝图在另一个事件图中搜索事件名�
 -  **输入修饰器（Input Modifiers）** 
 -  **输入触发器（Input Triggers）** 
 
-### 第三人称移动实战
+## 第三人称移动实战
 
 参考视频：[添加与配置增强输入系统](https://www.bilibili.com/video/BV1Fy411v7gm?p=3)
 
