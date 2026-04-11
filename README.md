@@ -530,7 +530,11 @@ VSM，可以提供稳定的高分辨率阴影，通常与Nanite、Lumen以及世
 - Branch 条件语句，相当于If
 - IsValid 合法值判断
 
-习惯为蓝图进行区域整理与注释，框选后快捷键C
+**==快捷键==**
+
+- 注释：习惯为蓝图进行区域整理与注释，框选后快捷键C
+- 整理：多选，快捷键Q进行齐平整理
+- 连线节点：双击连线可以在连线中创建一个节点，用于整理连线，该节点可拖动
 
 ### 自定义事件
 
@@ -543,8 +547,6 @@ Add Custom Event，命名后可跨蓝图在另一个事件图中搜索事件名�
 1. Print 打印
 2. BreakPoint 断点调试，右键需要断点的节点，Add BreakPoint，蓝图运行时如果达到该断点则会停住，快捷键F9
 3. Watch Values，在蓝图节点间或变量引脚右键，选择Watch this value监视此致，静态观察，不需要中断游戏
-
-
 
 ## 增强输入
 
@@ -602,15 +604,184 @@ Add Custom Event，命名后可跨蓝图在另一个事件图中搜索事件名�
       4. 这一步点击保存与编译再Play就可以实现wasd的运动了
       5. 右键搜索 IA_Look 事件
          直接连接到 Add Controller Yaw Input (对应 Action Value X) 和 Add Controller Pitch Input (对应 Action Value Y)
-      6. 补充：如果添加俯视等仰角变化时，以俯视注视角色同时移动时发现角色移动不懂，是因为 Add Movement Input 的 World Direction获取时传入了额外维度的数据，其实只需要z轴，拆分一下引脚输出和输入即可修复。
+      6. 补充：
+         1. 如果添加俯视等仰角变化时，以俯视注视角色同时移动时发现角色移动不动，是因为 Add Movement Input 的 World Direction获取时传入了额外维度的数据，其实只需要z轴，拆分一下引脚输出和输入即可修复。
+         2. 一些意外的物理碰撞、受力或动画偏移可能导致即使输入只在一个轴上玩家角色的实际移动可能还是会出轴/出轨，可以在 BP_MyCharacter 自定义的角色类的 Components - CharacterMovement Component 的  Details（细节） 面板中搜索 "Planar"，勾选 Constrain to Plane (约束至平面)。将 Plane Constraint Normal 设置为：(0, 1, 0) 锁定平面指向的法线向量（x, z为0）。将 Set Plane Constraint Origin 保持在 Y=0。
 
 
+
+## 协作: 版本控制
+
+Revision Control
+
+协作时先配置Git, 蓝图编辑窗口右下角 Revision Control - Change Revision Control Settings 配置git路径 (cmd 执行 where git 输出路径)
+
+版本控制信号: 
+
+- 绿色对勾, 表示文件最新
+- 红色问号, 新建资产, 还没有被 Git 追踪
+- 蓝色加号, 资产已添加, 但还未第一次提交
+- 感叹号或者勾选符号, 资产已被签出(Checked Out), 本地可写, 等待修改提交
+
+当修改蓝图并尝试保存时，弹出 **Check out assets** 窗口，这是虚幻引擎保护资产的一种机制。
+在此之前, 本地资产都还只是只读, Check Out 以后会被服务器(或LFS)记录下占用。
+当你尝试修改一个别人已经 Check out 的资产，虚幻会弹出警告，提示“该资产已被 [用户名] 锁定”。
+
+**最佳实践**
+
+1. 开始修改前，先编辑资产，保存触发 Check out，确认 Make writeable
+2. 修改中，及时频繁地编译 Compile (蓝图)
+3. 修改结束，Save资产，在内容浏览器中右键 Revision Control - Check In 或者蓝图编辑器右下角 Revision Control - Check In
+
+
+
+# C++
+
+## 语法清单
+
+C++作为一门提供”绝对控制权“的工业级编程语言，其入门上手并不容易，虽然虚幻引擎中的C++是高度封装定制、自动化后的，但也建议在虚幻里进行C++从零开始的开发前，先系统性完整性地单独学习原生C++语言，至少学习掌握以下语法：
+
+1. **内存管理**：
+   - 指针、引用
+   - 堆、栈
+   - 空指针
+2. **类与面向对象**：
+   - 构造函数、析构函数
+   - 继承与多态
+   - 虚函数、重写
+   - 访问控制
+3. **预处理器与宏**：
+   - 基本宏定义
+   - ==**反射**==
+4. **现代 C++ 特性**：
+   - `auto` 关键字
+   - 常量正确性 (`const`)
+   - 枚举类 (`enum class`)：强类型枚举
+   - 基础容器：熟悉 `std::vector` 和 `std::map`， 对应到UE里的 `TArray` 和 `TMap` 等
+5. **编译原理基础**：
+   - 头文件与源文件
+
+
+
+## 常用方法
+
+- format C++20格式化方法
+
+  ```C++
+  // 自动推导：
+  std::format("玩家：{}，等级：{}，胜率：{}%", "云天明", 99, 98.5);
+  // 对齐填充
+  std::cout << std::format("|{:_<10}|", "左对齐") << "\n"; // |左对齐_______|
+  std::cout << std::format("|{:*>10}|", "右对齐") << "\n"; // |_______右对齐|
+  std::cout << std::format("|{: ^10}|", "居中") << "\n";   // |    居中    |
+  // 控制精度与符号：
+  std::format("PI is {:+.2f}", pi); // PI is +3.14
+  ```
+
+- 
+
+
+
+## 反射
+
+**学习建议清单**
+
+| **优先级** | **内容**                               | **学习目标**                            |
+| ---------- | -------------------------------------- | --------------------------------------- |
+| **P0**     | **工厂模式与字符串映射**               | 实现 `CreateObject("MyClass")`。        |
+| **P1**     | **C++20 Concepts / type_traits**       | 掌握编译期类型检查，这是反射的基石。    |
+| **P2**     | **虚幻 `FindField` 与 `ProcessEvent`** | 在运行时通过反射修改属性或调用函数。    |
+| **P3**     | **三方库研究 (RTTR 或 PFR)**           | 看看纯 C++ 社区是如何不靠宏实现反射的。 |
+
+
+
+## Rider笔记
+
+### 快捷键
+
+可从vscode或者idea等习惯迁移
+
+- 全局搜索 双击shift
+- 全文搜索/文件中搜索 ctrl + shift + f   替换 ctrl + shift + h
+- 打开最近的文件 ctrl + e
+- 定位当前打开的文件所在的文件位置 alt + f1 选择资源管理器
+
+
+
+## Specifier & meta
+
+**Specifier** 标识符 
+
+- BlueprintCallable 暴露到蓝图中可被调用
+- BlueprintNativeEvent 原生蓝图事件，可进行覆盖调用
+
+**meta** 元数据说明符 
+
+- 函数默认参数值
+  - 仅在蓝图节点中设定默认值  CPP_Default_ParamName
+  - 用法：UFUNCTION(BlueprintCallable, meta = (Location ="4,5,6")) 可以指定蓝图中该方法的Location的默认参数，避免在C++尾部默认参数的语法
+- EditCondition表达式 用表达式计算来控制是否可被编辑
+- TitleProperty 结构数组元素标题，自定义结构美化直观
+  - meta = (TitleProperty = "{MyString}[{MyInt}]") 
+- CommutativeAssociativeBinaryOperator 二元运算符，Add pin来实现嵌套
+- Variadic 可动态的多输入多输入
+
+
+
+## 示例
+
+- UE_LOG 打印日志
+
+  ```c++
+  UE_LOG(LogLyra, Warning, TEXT("ClassName: %s"), *GetName());
+  // 频道或者说分类，级别，格式文本，格式参数
+  ```
+
+- 屏幕调试日志
+
+  ```C++
+  GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("This is an Example on-screen debug message."));
+  // 消息id防止重复，显示时间，颜色，格式文本，格式参数
+  ```
+
+- 每Tick进行旋转和上下移动
+  ![image-20260409142754151](https://raw.githubusercontent.com/york99alex/Pic4york/main/fix-dir/2026/04/09/b51c4aad69a41fac1765958652b9ad02-image-20260409142754151-0b8715.png)
+
+- [使用定时器](https://dev.epicgames.com/documentation/unreal-engine/using-timers-in-unreal-engine?application_version=5.5)
+
+- [断言](https://dev.epicgames.com/documentation/unreal-engine/asserts-in-unreal-engine?application_version=5.6) 
+
+  - check()、checkf() ，开发中会运行检测并触发崩溃，在发布中会自动移除
+
+  - verify 开发版本中类似于 check，但在发布中也会运行，只是不会进行崩溃处理
+
+  - ensure 用于处理非致命错误，所有版本都会运行但也都不会进行崩溃处理，但是会联系崩溃报告器，可获取触发信息
+
+
+  
+
+
+
+
+
+
+
+
+
+
+# 控制台命令
+
+- 属性细节面板查看效果
+  - 测试某个类 testprops class=xxx
+  - 测试某个结构 testprops struct=xxx
+  - 总的测试用例 testprops generator
 
 
 
 # ==命名规范==
 
-对于命名中的名称的命名主要采用帕斯卡命名
+对于所有资产，统一采用 [类型首字母大写缩写]_[帕斯卡命名]
+对于所有变量、函数等基本采用[帕斯卡命名](https://baike.baidu.com/item/%E5%B8%95%E6%96%AF%E5%8D%A1%E5%91%BD%E5%90%8D%E6%B3%95/9464494)
 
 ## 资产
 
@@ -632,6 +803,7 @@ Add Custom Event，命名后可跨蓝图在另一个事件图中搜索事件名�
   - **结构体 Structure**：S\_，S_ItemData
   - **枚举 Enumeration**：E_，E_GameState
   - **输入控制 Input Action**：IA_，IA_Move
+- 
 
 
 
@@ -674,6 +846,7 @@ Add Custom Event，命名后可跨蓝图在另一个事件图中搜索事件名�
 - [【虚幻引擎】爆肝两个月！拜托三连了！这绝对是全B站最用心的UE5.1全中文新手入门公开教程，耗时千余小时开发！_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Cd4y1V7G5/)
   入门4小时+实战4小时
 - [MotionDesign 植物生长动画](https://www.bilibili.com/video/BV1Rm42137WL/) Effector使用
+- [合集·UE5 C++全面上手  待更新](https://space.bilibili.com/310126275/lists/2910380)
 - 
 
 
@@ -681,3 +854,51 @@ Add Custom Event，命名后可跨蓝图在另一个事件图中搜索事件名�
 # Demo
 
 目标：多样运动能力，控制物体交互，漂浮固定物体
+
+
+
+
+
+# TODO
+
+1. 游戏重开逻辑 boss死亡进行重开，通过 lylarboss 获取场景boss，GamePlay
+   1. B_TeamDeathMatchScoring 需要响应游戏结束事件清理Timer
+   2. 学习掌握 Gameplay Message Subsystem 的发布及订阅方法
+   3. 理解Lyra伤害和血量系统
+2. 队友伤害硬直  ULyraTeamSubsystem::CanCauseDamage 搜索fixme
+3. 射击 修改为 弹道检测（现在是射线检测方案）
+
+
+
+# Lyra
+
+
+
+## 阶段逻辑整理
+
+1. Boss关卡Map
+2. 游戏体验 Gameplay Experience => B_BossArenaExperience 
+   可以理解游戏模式的高级版本，从 LyraExperienceDefinition 派生
+   1. 依次从 B_BossArenaExperience 中加载 Game Features、Pawn Data、Action Sets、Actions
+   2. 在Actions中，Add Abilities、Add Components等
+   3. 其中Add Components会为 LyraGameState 挂载若干组件
+      1. 其中一个 B_TeamDeathMatchScoring 组件（蓝图类）
+         1. 经过主机判断Authority、体验加载ExperienceReady调用方法 StartPhase
+            - K2_StartPhase => StartPhase => GiveAbilityAndActivateOnce => InternalTryActivateAbility => CallActivateAbility
+         2. 触发 Phase_Warmup 的 Event ActivateAbility
+            - 注：所有的 ULyraGamePhaseAbility 的 ActivateAbility 都会调用其 OnBeginPhase，
+              而在 OnBeginPhase 中会检测所有 ActivePhases 并 CancelAbilitiesByFunc/OnEndPhase 所有不同级的阶段
+         3. Phase_Warmup 加载玩家，全部就位则进入 Phase_Playing
+         4. 结束 Phase_Warmup 会触发 B_TeamDeathMatchScoring 在 StartPhase Warmup时委托的事件回调 GameStarted，开启倒计时。
+             ==TODO==  修改为累加计时
+         5. 倒计时结束触发蓝图内函数 HandleVictory
+            1. Activate User Facing Cue 启用 ”MatchDecided” 这一 Gameplay Cue，播放对应特效
+            2. 
+
+
+
+
+
+## Gameplay Message
+
+Gameplay Message Subsystem 提供了高性能、解耦的”发布-订阅“系统
